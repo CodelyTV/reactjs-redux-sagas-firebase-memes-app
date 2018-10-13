@@ -45,7 +45,7 @@ After adding new addons we can the new tabs in the storybook dashboard
 ![before](../images/009.png)
 ![after](../images/010.png)
 
-### The signup form
+### A dummy SignupForm component with an story in Storybook.js
 
 > NOTE: From here I'm supposing you are using, like me, **vscode** editor with **eslint** extension installed.
 
@@ -95,10 +95,90 @@ At this points if you run storybook `$ yarn run storybook` the result should sho
 
 ![signupform story](../images/012.png)
 
-### Dependencies for the *signup form*
+### Building the SignupForm
 
-- [prop-types](https://github.com/facebook/prop-types): Runtime type checking for React props and similar objects.
-- [react-router](https://github.com/ReactTraining/react-router): Add as dependency with `$ yarn add react-router-dom`. We use *react-router* to manage the routes of our project. It is needed also when placing links to other sections.
-- [styled-componets](https://www.styled-components.com/): Use tagged template literals to create styled react components.
-- [semantic-ui-react](https://react.semantic-ui.com/usage) and [semantic-ui-css](https://react.semantic-ui.com/usage): Set of components implementing the SemanticUI framework.
-- [validator](https://github.com/chriso/validator.js): String validation utils, for example, to validate a string is a well formed email.
+> To create a nice UI we are going to make use of:
+> 
+> - [semantic-ui-react](https://react.semantic-ui.com/usage) (`$ yarn add semantic-ui-react`) and [semantic-ui-css](https://react.semantic-ui.com/usage) (`$ yarn add semantic-ui-css`): Set of components implementing the SemanticUI framework.
+> - [styled-componets](https://www.styled-components.com/) (`$ yarn add styled-components`): Use tagged template literals to create styled react components.
+>
+> In addition, we are going to use:
+> 
+> - [prop-types](https://github.com/facebook/prop-types) (`$ yarn add prop-types`): Runtime type checking for React props and similar objects.
+> - [validator](https://github.com/chriso/validator.js) (`$ yarn add validator`): String validation utils, for example, to validate a string is a well formed email.
+
+Our `SignupForm` has three properties:
+
+- `loading`: Boolean used to indicate if the form is working, like trying to send data to the server. If so the component must show a loading spinner.
+- `errorMessagep`: String with a message to show to the user to inform about any error in the form or sending data.
+- `onSubmit`: A function to be executed when user fills the form. This allows to separate the logic from the presentation.
+
+```html
+  <SignupForm
+    loading={loading}
+    errorMessage={errorMessage}
+    onSubmit={() => console.log('Submit 🚀)}
+  />
+```
+
+> NOTE: Because we are going to use ES6 experimental features not included yet in `eslint` tool we need to set the property `"parser": "babel-eslint"` in the `.eslintrc` file.
+
+If we run again storybook we will see something similar to the next picture, where the form components has no style. This is due we need to make storybook includes the appropriate CSS styles from *sematinc-ui*.
+
+![no styles](../images/013.png)
+
+To fix this simple edit the `./storybook/config.js` file and add the next lines:
+
+```javascript
+import { configure } from '@storybook/react';
+
+import 'semantic-ui-css/semantic.min.css';
+import '../src/globalStyles';
+
+function loadStories() {
+  require('../src/stories');
+}
+
+configure(loadStories, module);
+```
+
+> NOTE: We have created a `src/globalStyles.js` file which defines some global CSS styles for our app.
+
+Finally, with the previous changes you should see:
+
+![with styles](../images/014.png)
+
+Now we can update our component story to use the `knobs` addons that allows us to pass properties dynamically. Update the code at `src/stories/index.js` to the next one:
+
+```javascript
+/* eslint-disable import/no-extraneous-dependencies */
+import React from 'react';
+
+import { storiesOf, setAddon } from '@storybook/react';
+import JSXAddon from 'storybook-addon-jsx';
+import { action } from '@storybook/addon-actions';
+import { withKnobs, text, boolean } from '@storybook/addon-knobs';
+
+import SignupForm from '../components/SignupForm';
+
+setAddon(JSXAddon);
+
+storiesOf('SignupForm', module)
+  .addDecorator(withKnobs)
+  .addWithJSX('dynamic props', () => {
+    const loading = boolean('loading');
+    const errorMessage = text('errorMessage');
+
+    return (
+      <SignupForm
+        loading={loading}
+        errorMessage={errorMessage}
+        onSubmit={action('submit')}
+      />
+    );
+  });
+```
+
+Now story book will show, in the knobs tab, the two knobs defined for `loading` and `errorMessage`. Try updating its value to see how storybook updates the component:
+
+![signup story](../images/015.png)
