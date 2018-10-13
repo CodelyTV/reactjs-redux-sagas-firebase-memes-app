@@ -1,136 +1,46 @@
-# Unit 1
+# Unit 2
 
-> **Dependencies**: We need to have installed NodeJS, yarn and create-react-app.
-
-This unit contains the base project structure.
+This unit installs the [storybook.js](https://storybook.js.org) tool and creates the presentational components of the app.
 
 ## Steps
 
-### Scaffolding
+### Storybook.js
 
-We have created our project scaffolding using [`create-react-app`](https://github.com/facebook/create-react-app)
+When developing reusable components (imagine a basic library of buttons, labels, etc) we need to continuously see if the components works as expected, for example, *if I pass the property `disable` to a button it must look disable*, *if I pass the `loading` property to a label it must show a loading spinner*, etc.
 
-```bash
-$ npx create-react-app PROJECT_NAME
+`Storybook.js` allow us to write *stories* (use cases) of our components and it will present in a *live* dashboard that is updated if we change our code. Once finished `Storybook.js` also allows to create a *build* of our stories that can server as a documentation/example for those that are going to use our library.
+
+To install storybook:
+
+- `$ npm i -g @storybook/cli` Install it as a global dependency.
+- Go into your project folder `$ cd PROJECT_NAME`
+- `getstorybook` run initialization script. It automatically detect the project is CRA based and will update our dependencies and add a couple of scripts into the `package.json` file.
+
+Now if we run storybook `$ yarn run storybook` if will run a server at `http://localhost:9009` showing some example stories.
+
+### Storybook.js addons
+
+Storybooks can be configured with addons, which extends its functionalities. We are going to install:
+
+- [knobs](https://github.com/storybooks/storybook/tree/release/3.4/addons/knobs): 
+Knobs allow you to edit React props dynamically using the Storybook UI. You can also use Knobs as dynamic variables inside your stories. `$ yarn add @storybook/addon-knobs --dev`.
+
+- [Viewport](): Viewport allows your stories to be displayed in different sizes and layouts in Storybook. This helps build responsive components inside of Storybook. `$ yarn add @storybook/addon-viewport --dev`
+
+- [JSX preview](https://github.com/storybooks/addon-jsx): 
+This addon shows a preview of the JSX code for each story. It allows you to configure the display and copy the code with a single click. `$ yarn add --dev storybook-addon-jsx`
+
+Update the `.storybook/addons.js` file to import the new installed addons. It should look similar to:
+
+```javascript
+import '@storybook/addon-knobs/register';
+import '@storybook/addon-viewport/register';
+import '@storybook/addon-actions/register';
+import 'storybook-addon-jsx/register';
+import '@storybook/addon-links/register';
 ```
 
-> Note one important fact about this is we can use some ES6 features, like class fields and static properties. See [Supported Language Features and Polyfills](https://github.com/facebook/create-react-app/blob/master/packages/react-scripts/template/README.md#supported-language-features)
+After adding new addons we can the new tabs in the storybook dashboard
 
-Update the `package.json` file with some information about project details (like author, contributors, descriptions, keywords, etc).
-
-At this point we have our scaffolding ready to run with `$ yarn run start`. This will open `localhost:3000` and present the next screen:
-
-![console](../images/002.png)
-![CRA](../images/001.png)
-
-> **Why using CRA (create-react-app) ?**
-> 
-> We do not recommend using CRA in your first react application. It makes tons of things that could seem *magic*.
->
-> When working with JS and, mainly for client side, our applications tend to need things like having a lightweight size or reduce the number of calls to server (among many others). To help on that has arisen tools like `webpack`, which given an *entry point* analyzes our dependencies (that is, which other files are imported or required) and creates a unique file (a bundle) doing things like:
->
-> - Ensure each file is included only once
-> - Minimize/uglify the code to reduce the final size.
-> - Inlining CSS code
-> - Inlining SVG images
-> 
-> All that is perfect for production, the issue is while developing additional things, like: continue seeing the original source code or *watch* for file change to *rebundle*.
-> 
-> So, at this point, is where tools like CRA are useful. Once you know how to make all that things by yourself, the best you can do is DRY.
->
-> CRA initializes our project with four npm scripts:
->
-> ```json
->   "scripts": {
->     "start": "react-scripts start",
->     "build": "react-scripts build",
->     "test": "react-scripts test",
->     "eject": "react-scripts eject"
->   },
-> ```
-> 
-> - `start`: Runs our project in development mode at `localhost:3000`.
-> - `build`: Generates a `build` folder with optimized code for production.
-> - `test`: Magic, it runs the tests of our project.
-> - `eject`: *Cleans* our project from any dependency on CRA.
-
-### Development dependencies
-
-We encourage you install the next browser extensions while developing, they will help you to better understand what `react` and `redux` are doing under the hood.
-
-- [`react-devtools`](https://github.com/facebook/react-devtools): React browser extension.
-- [`redux-devtools-extension`](https://github.com/zalmoxisus/redux-devtools-extension): Redux browse extension to see redux actions.
-
-### Linting
-
-> We have used [Visual Code Editor](https://code.visualstudio.com) with the `eslint` extension installed, which automatically recognizes eslint configuration and lint our code while editing.
-
-CRA uses the [`eslint`](https://eslint.org/) tool to check if our code has errors. Any time CRA *compiles* our code and found an error it will present us in the command line and also in the browser:
-
-![console error](../images/003.png)
-![browser error](../images/004.png)
-
-CRA linting rules are fine, but we want a bit more strict to encourage all the code follow the same *style*. For example, if you edit the `src/App.js` and updated it like in the next images, you will see CRA do not triggers any error:
-
-![appjs fine](../images/005.png)
-![appjs ugly](../images/006.png)
-
-Because of this we have configured the project to use the rules defined by AirBnB in [`eslint-config-airbnb`](https://www.npmjs.com/package/eslint-config-airbnb). To install them:
-
-```bash
-$ npx install-peerdeps --dev eslint-config-airbnb
-```
-
-Once dependencies have been installed we need to create `.eslintrc` file with the next config. This is necessary so our editor lints the source code while developing:
-  ```
-  {
-    "extends": "airbnb"
-  }
-  ```
-![lint errors in vscode](../images/007.png)
-
-> Probably, next time you run `$ yarn run start` it will probably fail due a mix of dependencies about `eslint` package, simply follow the steps the message says:
-> 
->   ```
->     1. Delete package-lock.json (not package.json!) and/or yarn.lock in your project folder.
->     2. Delete node_modules in your project folder.
->     3. Remove "eslint" from dependencies and/or devDependencies in the package.json file in your project folder.
->     4. Run npm install or yarn, depending on the package manager you use.
->   ```
-
-Finally, we have added a new script to our `package.json` to lint all our source code at once with `$ yarn run lint`:
-
-```json
-  "scripts": {
-    ...
-    "lint": "eslint ./src",
-    ...
-  },
-```
-
-> NOTE: It is a better idea to a tool like [`husky`](https://www.npmjs.com/package/husky) to automatically force running the linting before apply or push any commit.
-
-### Credentials
-
-Our app will use [Giphy](https://giphy.com) to get funny memes and [Firebase](https://firebase.google.com) as backend service. Becuase of this we need to register and get the need credentials from each one.
-
-Fortunately for us, CRA support `.env` variables. Specifically it will read variables from `.env.local` file when running locally, so we will store on that file the access code and API keys for the previous services. Also, a good point is the `.gitignore` file create by CRA will ignore it by default, so placing credentials in the `.env.local` is perfect for developing locally because we can be sure they will not be published on a git repository.
-
-> As a sample file we have added the `.env.dist` file.
-
-### Firebase credentials
-
-- Go to `https://firebase.google.com` and register as a user. Then go to the console `https://console.firebase.google.com`.
-- Create a new project.
-- Go to `Authentication` and click in the `Web setup` button.
-- Copy the `config` variable:
-  ![firebase config](../images/008.png)
-- Convert to JSON string: `JSON.stringigy($CODE_HERE)`.
-- Add it to the `.env.local` file under `REACT_APP_FIREBASE_CONFIG` variable.
-
-## Giphy credentials
-
-- Go to `https://firebase.google.com/` and register as a user.
-- Create a new app and get the provided API Key.
-- Add it to the `.env.local` file under `REACT_APP_GIPHY_API_KEY` variable.
-
+![before](../images/009.png)
+![after](../images/010.png)

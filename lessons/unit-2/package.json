@@ -1,5 +1,5 @@
 {
-  "name": "unit-1",
+  "name": "unit-2",
   "version": "0.1.0",
   "private": true,
   "description": "Meme timeline application using react, redux, redux-sagas and firebase",
@@ -37,7 +37,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "lint": "eslint ./src",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "storybook": "start-storybook -p 9009 -s public",
+    "build-storybook": "build-storybook -s public"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -49,9 +51,18 @@
     "not op_mini all"
   ],
   "devDependencies": {
+    "@storybook/addon-actions": "^3.4.11",
+    "@storybook/addon-knobs": "^3.4.11",
+    "@storybook/addon-links": "^3.4.11",
+    "@storybook/addon-viewport": "^3.4.11",
+    "@storybook/addons": "^3.4.11",
+    "@storybook/react": "^3.4.11",
+    "babel-core": "^6.26.3",
+    "babel-runtime": "^6.26.0",
     "eslint-config-airbnb": "17.1.0",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-jsx-a11y": "^6.1.1",
-    "eslint-plugin-react": "^7.11.0"
+    "eslint-plugin-react": "^7.11.0",
+    "storybook-addon-jsx": "^5.4.0"
   }
 }
