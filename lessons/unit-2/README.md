@@ -44,3 +44,61 @@ After adding new addons we can the new tabs in the storybook dashboard
 
 ![before](../images/009.png)
 ![after](../images/010.png)
+
+### The signup form
+
+> NOTE: From here I'm supposing you are using, like me, **vscode** editor with **eslint** extension installed.
+
+Lets create a `src/components/SignupForm.js` file with a very basic content:
+
+```javascript
+const SignupForm = () => (
+  <div>Our signup form</div>
+);
+
+export default SignupForm;
+```
+
+Automatically, the editor will highlight two error: ![error](../images/011.png)
+
+- `[eslint] 'React' must be in scope when using JSX (react/react-in-jsx-scope)`: This can be easily solved import react dependency on top of the file: `import React from 'react';`.
+- `[eslint] JSX not allowed in files with extension '.js' (react/jsx-filename-extension)`: This can be solved indicating to the eslint tool that we want to use JSX notation both in `.js`  and `.jsx` files. To do that, edit the `.eslintrc` file and edit as follows:
+  ```json
+  {
+    "extends": "airbnb",
+    "rules": {
+      "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }]
+    }
+  }
+  ```
+
+Open the `src/stories/index.js` file and lets update the file to contain a story about our new `SignupForm` component
+
+```javascript
+/* eslint-disable import/no-extraneous-dependencies */
+import React from 'react';
+
+import { storiesOf, setAddon } from '@storybook/react';
+import JSXAddon from 'storybook-addon-jsx';
+
+import SignupForm from '../components/SignupForm';
+
+setAddon(JSXAddon);
+
+storiesOf('SignupForm', module)
+  .addWithJSX('default', () => <SignupForm />);
+```
+
+> NOTE: The line `/* eslint-disable import/no-extraneous-dependencies */` is necessary to avoid eslint marks the lines related with importing `@storybook` as error. Those packages are set as `devDependencies` in `package.json` and because we are using in a *normal* JS file, eslint advice us that any dependency must reside as `dependency`. That line on the top of the file simply informs eslint that can ignore that issue.
+
+At this points if you run storybook `$ yarn run storybook` the result should show something like:
+
+![signupform story](../images/012.png)
+
+### Dependencies for the *signup form*
+
+- [prop-types](https://github.com/facebook/prop-types): Runtime type checking for React props and similar objects.
+- [react-router](https://github.com/ReactTraining/react-router): Add as dependency with `$ yarn add react-router-dom`. We use *react-router* to manage the routes of our project. It is needed also when placing links to other sections.
+- [styled-componets](https://www.styled-components.com/): Use tagged template literals to create styled react components.
+- [semantic-ui-react](https://react.semantic-ui.com/usage) and [semantic-ui-css](https://react.semantic-ui.com/usage): Set of components implementing the SemanticUI framework.
+- [validator](https://github.com/chriso/validator.js): String validation utils, for example, to validate a string is a well formed email.
