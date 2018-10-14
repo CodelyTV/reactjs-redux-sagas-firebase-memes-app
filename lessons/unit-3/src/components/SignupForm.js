@@ -2,9 +2,11 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { isEmail, isLength } from 'validator';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 import {
   Button, Form, Grid, Header, Message, Segment, Icon,
 } from 'semantic-ui-react';
+import urls from '../urls';
 
 const HelpMessage = styled.div`
   font-size: 0.8em;
@@ -142,7 +144,7 @@ class SignupForm extends PureComponent {
           { errorMessage && <Message negative>{errorMessage}</Message>}
 
           <Segment basic>
-            Already have an account? <a href="/">Login</a>
+            Already have an account? <Link to={urls.HOME}>Login</Link>
           </Segment>
         </Grid.Column>
       </Grid>

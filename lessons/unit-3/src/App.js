@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import {
   BrowserRouter, Switch, Route, Link,
 } from 'react-router-dom';
+import SignupForm from './components/SignupForm';
+import NotFound from './components/NotFound';
 
 import './globalStyles';
 
@@ -19,23 +21,11 @@ const Home = () => (
   </FullScreenWrapper>
 );
 
-const Signup = () => (
-  <FullScreenWrapper backgroundColor="#ccc">
-    This is the signup ! Return to <Link to="/">home</Link>
-  </FullScreenWrapper>
-);
-
-const NotFound = () => (
-  <FullScreenWrapper backgroundColor="#999">
-    Not found :( Better <Link to="/">go home</Link>
-  </FullScreenWrapper>
-);
-
 const App = () => (
   <BrowserRouter>
     <Switch>
       <Route exact path="/" component={Home} />
-      <Route path="/signup" component={Signup} />
+      <Route path="/signup" component={SignupForm} />
       <Route component={NotFound} />
     </Switch>
   </BrowserRouter>

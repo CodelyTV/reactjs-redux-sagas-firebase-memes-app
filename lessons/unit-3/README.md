@@ -98,9 +98,7 @@ const App = () => (
 );
 ```
 
-If you write `/`, `/sigmup` or `not-exists` in the browser url you will see the corresponding component. But there is a problem, each time we update the url we are making a call to the server. What we want is to have some *link* (in the future app some buttons) that allows us to *navigate* in our app without calling the server and reloading it.
-
-Finally, update each component to use the `Link` provided by `react-router-dom` which allows to update the history url:
+If you write `/`, `/sigmup` or `not-exists` in the browser url you will see the corresponding component. But there is a problem, each time we update the url we are making a call to the server. What we want is to have some *link* (in the future app some buttons) that allows us to *navigate* in our app without calling the server and reloading it. To do that, update each component to use the `Link` provided by `react-router-dom` which allows to update the history url:
 
 ```javascript
 const Home = () => (
@@ -122,3 +120,11 @@ const NotFound = () => (
 );
 ```
 Now we can navigate among app section without reloading the app, thans to `react-router`.
+
+To end the exercise, we are going to update the `App` component to use our previously create `SignupForm` component. Note we need to modify it to use `Link` to the home section, instead a simple `a` tag.
+
+Finally, we are going to extract the code for the `NotFound` component to the `src/NotFound.js` file.
+
+> NOTE: We have created a `urls.js` with the name and url of the main sections of the app. This way we can use variables instead literal values in our code.
+
+[![basic navigation](../images/016.png)](../images/basic-navigation.mov)
