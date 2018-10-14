@@ -83,7 +83,7 @@ class SignupForm extends PureComponent {
           <Header as="h2" textAlign="center">
             <Icon name="rocketchat" />
             {' '}
-            Babili
+            Dividi
           </Header>
 
           <Form onSubmit={this.handleSubmit}>
