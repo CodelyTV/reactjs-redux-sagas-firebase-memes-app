@@ -128,3 +128,22 @@ Finally, we are going to extract the code for the `NotFound` component to the `s
 > NOTE: We have created a `urls.js` with the name and url of the main sections of the app. This way we can use variables instead literal values in our code.
 
 [![basic navigation](../images/016.png)](../images/basic-navigation.mov)
+
+### Update stories
+
+The `Link` component can only be used within a `Rotuer` context. In the app, because the root component is wrapper by `BrowserRouter` we can use the `Link` component in the `SignupForm` or the `NotFound` components.
+
+Now if you run the `storybook` again you will see an error related with that. To fix it you need to import `react-router` and wrap the stories within it:
+
+```javascript
+...
+import { BrowserRouter } from 'react-router-dom';
+...
+
+storiesOf('NotFound', module)
+  .addWithJSX('default', () => (
+    <BrowserRouter>
+      <NotFound />
+    </BrowserRouter>
+  ));
+```

@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import {
   Button, Form, Grid, Header, Message, Segment, Icon,
 } from 'semantic-ui-react';
+import firebase from '../services/firebase';
 import urls from '../urls';
 
 const HelpMessage = styled.div`
@@ -33,6 +34,13 @@ class SignupForm extends PureComponent {
     email: '',
     password: '',
     hasFormValidValues: {},
+  }
+
+  componentDidMount() {
+    const auth = firebase.auth();
+    auth.onAuthStateChanged((user) => {
+      console.log('-> User changed: ', user && user.toJSON());
+    });
   }
 
   handleUsernameChanged = (event, data) => {
@@ -68,11 +76,19 @@ class SignupForm extends PureComponent {
     });
   }
 
-  handleSubmit = () => {
+  handleSubmit = async () => {
     const { username, email, password } = this.state;
     const { onSubmit } = this.props;
 
-    onSubmit(username, email, password);
+    // onSubmit(username, email, password);
+
+    const auth = firebase.auth();
+    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+    if (userCredential) {
+      const { user } = userCredential;
+      await user.updateProfile({ displayName: username });
+      console.log('-> User: ', user.toJSON());
+    }
   }
 
   render() {
