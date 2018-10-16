@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import {
   BrowserRouter, Switch, Route, Link,
 } from 'react-router-dom';
-import SignupForm from './components/SignupForm';
+import SignupForm from './containers/SignupForm';
 import NotFound from './components/NotFound';
 
 import './globalStyles';
