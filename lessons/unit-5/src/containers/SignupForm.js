@@ -5,6 +5,7 @@ import { Redirect } from 'react-router-dom';
 import SignupFormRender from '../components/SignupForm';
 import firebase from '../services/firebase';
 import urls from '../urls';
+import { newUser } from '../ducks/auth/actions';
 
 class SignupForm extends PureComponent {
   static defaultProps = {
@@ -16,6 +17,7 @@ class SignupForm extends PureComponent {
     user: PropTypes.object,
     fetching: PropTypes.bool.isRequired,
     error: PropTypes.object,
+    newUserAction: PropTypes.func.isRequired,
   }
 
   handleCreateUser = async (username, email, password) => {
@@ -24,7 +26,9 @@ class SignupForm extends PureComponent {
     if (userCredential) {
       const { user } = userCredential;
       await user.updateProfile({ displayName: username });
-      console.log('-> User: ', user.toJSON());
+
+      const { newUserAction } = this.props;
+      newUserAction(user);
     }
   }
 
@@ -53,4 +57,8 @@ const mapStateToProps = state => ({
   error: state.auth.error,
 });
 
-export default connect(mapStateToProps)(SignupForm);
+const mapDispatchToProps = dispatch => ({
+  newUserAction: user => dispatch(newUser(user)), 
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(SignupForm);

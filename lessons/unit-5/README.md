@@ -282,6 +282,59 @@ export const newUser = user => ({
 
 #### Dispatch action
 
+With our current code, the `src/containers/SignupForm` is can register a new user in Firebase, listen for changes and get properties from redux state, but it lacks of the ability to trigger an action (that could later update the store via a reducer).
+
+To make a container can dispatch an action we can use the `connect` method provided by reduc. In addition to the `mapStateToProps` parameters we can also pass a second one named `mapDispatchToProps`. Because every action should be triggered through the `store.dispatch()` method, the `mapDispatchToProps` function give us access to the `dispatch` reference needed to trigger actions. In addition, like the `mapStateToProps`, all the properties returned will be present as properties within the react component.
+
+Let's update the `src/containers/SignupForm` to allow trigger the `newUser` action we created previously:
+
+```javascript
+import { connect } from 'react-redux';
+import { newUser } from '../ducks/auth/actions';
+...
+
+class SignupForm extends PureComponent {
+  ...
+
+  static propTypes = {
+    ...
+    newUserAction: PropTypes.func.isRequired,
+  }
+
+  handleCreateUser = async (username, email, password) => {
+    const auth = firebase.auth();
+    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+    if (userCredential) {
+      const { user } = userCredential;
+      await user.updateProfile({ displayName: username });
+
+      const { newUserAction } = this.props;
+      newUserAction(user);  // <----- Trigger the action
+    }
+  }
+
+  render() {
+    ...
+  }
+}
+
+...
+
+const mapDispatchToProps = dispatch => ({
+  // 'newUserAction' will become a SignupForm component property
+  newUserAction: user => dispatch(newUser(user)), 
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(SignupForm);
+```
+
+##### Explore with redux-devtools
+
+Run our app, go to the `http://localhost:3000/signup` and fill the signup form with some data. Now open the browser developer tools on the Redux tab and submit the form content. You should see something like:
+
+![redux-devtools new user action](../images/018.png)
+
+You can see how the `NEW_USER` action is triggered and its payload. In addition you can selected the `State` tab and se the value of redux state on each action.
 
 #### Creating the reducer
 
