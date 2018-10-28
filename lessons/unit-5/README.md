@@ -1,6 +1,6 @@
 # Unit 5
 
-In this unit we are going to introduce `redux` and `redux-sagas` and show how they can help us to sepparate the business logic from presentation to create more scalable applications.
+In this unit we are going to introduce `redux` and `redux-sagas` and show how they can help us to separate the business logic from presentation to create more scalable applications.
 
 ## Steps
 
@@ -336,6 +336,53 @@ Run our app, go to the `http://localhost:3000/signup` and fill the signup form w
 
 You can see how the `NEW_USER` action is triggered and its payload. In addition you can selected the `State` tab and se the value of redux state on each action.
 
-#### Creating the reducer
+#### Creating the reducer to update the state
 
+Right now we are able to create a user and trigger an action with the new user data but we are not updating our redux state. If we desire any component in our app can know when a user is created we need to update the `auth.user` property in the state.
 
+Let's create a `src/ducks/auth/reducer.js` file that will be responsible to lister for `NEW_USER` action and update the state, but before we are going to update the `rootReducer.js` file:
+
+```javascript
+import { combineReducers } from 'redux';
+import authReducer from './ducks/auth/reducer';
+
+export default combineReducers({
+  auth: authReducer,
+});
+```
+
+What we are saying to redux is "ey, the `authReducer` is only responsible to reduce the `state.auth` *slice* and not the whole state.". With that in mind, now we can code our reducer:
+
+```javascript
+import initialState from '../../initialState';
+
+const defaultState = initialState.auth;
+
+// First time the reducers is execuded the `state` is null, this way we return
+// the initial value desired for our slice.
+export default (state = defaultState, action) => {
+  switch (action.type) {
+    case 'NEW_USER':
+      return {
+        ...state,
+        user: action.user,
+      };
+
+    default:
+      return state;
+  }
+};
+```
+
+Try to register a new user with the redux-devtools opened in your browser. If you select the `NEW_USER` action and the `diff` tab, you will see which properties of the state has changed on that action:
+
+![new user reducer](../images/019.png)
+
+In addition, note how after creating the user the `containers/SignupForm` redirects to the home screen. This is due our `if` sentence within the render, that is:
+
+- `SignupForm` container is rendered
+- Form is filled, the user is registered
+- The `NEW_USER` action is triggered with the user's data
+- The reducers updates the state `auth.user` property
+- The state triggers the changes and the `SignupForm` container is notifying with the new value for the `user` property.
+- The `SignupForm` container renders again and, because, `user` is defined we render the `Redirect` component which redirects us to the home.
