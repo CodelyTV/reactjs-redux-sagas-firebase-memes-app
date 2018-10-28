@@ -151,7 +151,7 @@ const composeEnhancers = process.env.NODE_ENV === 'development'
   : compose;
 
 const enhancer = composeEnhancers(
-  applyMiddleware([]), // Prepare for future middlewares
+  applyMiddleware(), // Prepare for future middlewares
 );
 
 const store = createStore(
@@ -165,8 +165,87 @@ export default store;
 
 #### Listen for store changes
 
+To listen for changes in the state redux offers us the `connect` function. Simply note, `connect` accepts some arguments. Here we are using `mapStateToProps` which is a function that receives the state of the app and returns those properties of interest for the component.
+
+```javascript
+import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+
+...
+
+class SignupForm extends PureComponent {
+  ...
+
+  handleCreateUser = async (username, email, password) => {
+    const auth = firebase.auth();
+    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+    if (userCredential) {
+      const { user } = userCredential;
+      await user.updateProfile({ displayName: username });
+      console.log('-> User: ', user.toJSON());
+    }
+  }
+
+  render() {
+    const { user, fetching, error } = this.props;
+    const errorMessage = error && error.message;
+
+    ...
+
+    return (
+      <SignupFormRender
+        loading={fetching}
+        errorMessage={errorMessage}
+        onSubmit={this.handleCreateUser}
+      />
+    );
+}
+
+const mapStateToProps = state => ({
+  user: state.auth.user,
+  fetching: state.auth.fetching,
+  error: state.auth.error,
+});
+
+export default connect(mapStateToProps)(SignupForm);
+```
+
+All the properties you return in `mapStateToProps` well be accessible to the component. For this reason we have changed the `render` method to get `user, fetching, error` from component's properties instead state.
+
+##### *Provide* the redux store to all the react components
+
+All container components need access to the Redux store so they can subscribe to it and listen for changes. The way recommended by redux is to wrap our entire application with the `Provider` component. This component will make use of the react context to make the store accessible to every component.
+
+```javascript
+<Provider store={store}>
+  <App />
+</Provider>
+```
+
+So, edit the `src/index.js` import the `Provider` component and wrap it with our previously created store object:
+
+```javascript
+...
+import { Provider } from 'react-redux';
+import store from './store';
+import App from './App';
+
+const root = (
+  <Provider store={store}>
+    <App />
+  </Provider>
+);
+
+ReactDOM.render(root, document.getElementById('root'));
+```
+
+This is how the `connect` method will have access to the store and will be able to *inject* our desired state properties in a component.
+
 #### Create the action
 
 #### Dispatch action
 
 #### Creating the reducer
+
+

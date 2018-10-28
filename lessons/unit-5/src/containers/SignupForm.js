@@ -1,40 +1,35 @@
 import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import { Redirect } from 'react-router-dom';
 import SignupFormRender from '../components/SignupForm';
-import urls from '../urls';
 import firebase from '../services/firebase';
+import urls from '../urls';
 
 class SignupForm extends PureComponent {
-  state = {
+  static defaultProps = {
     user: null,
-    fetching: false,
     error: null,
   }
 
-  handleCreateUser = async (username, email, password) => {
-    this.setState({ fetching: true });
-    try {
-      const auth = firebase.auth();
-      const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-      if (userCredential) {
-        const { user } = userCredential;
-        await user.updateProfile({ displayName: username });
+  static propTypes = {
+    user: PropTypes.object,
+    fetching: PropTypes.bool.isRequired,
+    error: PropTypes.object,
+  }
 
-        this.setState({
-          user,
-          fetching: false,
-        });
-      }
-    } catch (error) {
-      this.setState({
-        fetching: false,
-        error,
-      });
+  handleCreateUser = async (username, email, password) => {
+    const auth = firebase.auth();
+    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+    if (userCredential) {
+      const { user } = userCredential;
+      await user.updateProfile({ displayName: username });
+      console.log('-> User: ', user.toJSON());
     }
   }
 
   render() {
-    const { user, fetching, error } = this.state;
+    const { user, fetching, error } = this.props;
     const errorMessage = error && error.message;
 
     // If we are logged redirect to home
@@ -52,4 +47,10 @@ class SignupForm extends PureComponent {
   }
 }
 
-export default SignupForm;
+const mapStateToProps = state => ({
+  user: state.auth.user,
+  fetching: state.auth.fetching,
+  error: state.auth.error,
+});
+
+export default connect(mapStateToProps)(SignupForm);

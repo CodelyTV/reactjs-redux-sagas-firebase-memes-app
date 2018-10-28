@@ -11,7 +11,7 @@ const composeEnhancers = process.env.NODE_ENV === 'development'
   : compose;
 
 const enhancer = composeEnhancers(
-  applyMiddleware([]), // Prepare for future middlewares
+  applyMiddleware(), // Prepare for future middlewares
 );
 
 const store = createStore(
