@@ -244,7 +244,44 @@ This is how the `connect` method will have access to the store and will be able 
 
 #### Create the action
 
+From the redux documentation:
+
+> Actions are payloads of information that send data from your application to your store. They are the only source of information for the store. You send them to the store using `store.dispatch()`.
+
+> Actions are plain JavaScript objects. Actions must have a `type` property that indicates the type of action being performed.
+
+> Other than `type`, the structure of an action object is really up to you.
+
+Actions looks like:
+
+```javascript
+{
+  type: 'NEW_TODO',
+  text: 'Some tasks to do tomorrow'
+}
+```
+
+> #### A word about ducks
+>
+> Working with redux could be a bit cumbersome at the beginning, it requires creating actions, reducers, middlewares, etc because of this we are going to organize our code into *ducks*. 
+>
+> [ducks](https://github.com/erikras/ducks-modular-redux) are simply a proposal for bundling reducers, action types and actions when using Redux.
+>
+> Note, we are not applying the proposal to extrictly 😅
+>
+> We are going to organize our ducks by functionality. For example, all the things related with user authentication or registration will be in the `src/ducks/auth` folder.
+
+To avoid creating action object around our code, we are going to create an *action creator*, that is, a function that will create an action object given a set of parameters. To do so create a `src/ducks/auth/actions.js`:
+
+```javascript
+export const newUser = user => ({
+  type: 'NEW_USER',
+  user,
+});
+```
+
 #### Dispatch action
+
 
 #### Creating the reducer
 
