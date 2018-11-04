@@ -3,9 +3,8 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Redirect } from 'react-router-dom';
 import SignupFormRender from '../components/SignupForm';
-import firebase from '../services/firebase';
 import urls from '../urls';
-import { newUser } from '../ducks/auth/actions';
+import { newUserRequest } from '../ducks/auth/actions';
 
 class SignupForm extends PureComponent {
   static defaultProps = {
@@ -21,15 +20,8 @@ class SignupForm extends PureComponent {
   }
 
   handleCreateUser = async (username, email, password) => {
-    const auth = firebase.auth();
-    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-    if (userCredential) {
-      const { user } = userCredential;
-      await user.updateProfile({ displayName: username });
-
-      const { newUserAction } = this.props;
-      newUserAction(user);
-    }
+    const { newUserAction } = this.props;
+    newUserAction({ username, email, password });
   }
 
   render() {
@@ -58,7 +50,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  newUserAction: user => dispatch(newUser(user)),
+  newUserAction: user => dispatch(newUserRequest(user)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(SignupForm);

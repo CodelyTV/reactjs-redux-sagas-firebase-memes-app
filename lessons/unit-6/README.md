@@ -82,3 +82,162 @@ Notes:
 - The side effect `all` is a kind of effect that runs an array of generators (or sagas).
 - For the moment we are not running any saga 😄
 
+### Rethinking our workflow with sagas
+
+Lets modify our code. The final flow must be as follow:
+
+- Once the user complete the signup form we trigger a `NEW_USER_REQUEST` actions. By convention we will add the sufffix `_REQUEST` to all actions that *activate*  a saga.
+- A saga will catch the action, and proceed to create the new user. First we launch a `NEW_USER_START` action. This will allow us to update the state so that the `components/SignupForm` could show a load indicator.
+- Next we will try to create the user:
+  - if all works fine we will trigger a `NEW_USER_SUCCESS` action passing the user information so that the reducer can store it.
+  - Otherwise, if something goes wrong, we will trigger a `NEW_USER_FAILURE` passing the error so that the reducer could store the error and it could be shown by the `components/SignupForm`.
+
+#### Update actions
+
+Lets update and create new actions for previoudly commented actions:
+
+```javascript
+export const newUserRequest = ({ username, email, password }) => ({
+  type: 'NEW_USER_REQUEST',
+  payload: {
+    username,
+    email,
+    password,
+  },
+});
+
+export const newUserStart = () => ({
+  type: 'NEW_USER_START',
+});
+
+export const newUserSuccess = user => ({
+  type: 'NEW_USER_SUCCESS',
+  payload: {
+    user,
+  },
+});
+
+export const newUserFailure = error => ({
+  type: 'NEW_USER_FAILURE',
+  payload: {
+    error,
+  },
+});
+```
+
+#### Update the reducer
+
+Lets update our reducer to take into account the `NEW_USER_START`, `NEW_USER_SUCCESS` and `NEW_USER_FAILURE`. Note how we are ignoring the `NEW_USER_REQUEST` action, because it is only used to activate the sage:
+
+```javascript
+import initialState from '../../initialState';
+
+const defaultState = initialState.auth;
+
+// First time the reducers is executed the `state` is null, this way we return
+// the initial value desired for our slice.
+export default (state = defaultState, action) => {
+  switch (action.type) {
+    case 'NEW_USER_START':
+      return {
+        fetching: true,
+        user: null,
+        error: null,
+      };
+
+    case 'NEW_USER_FAILURE':
+      return {
+        fetching: false,
+        user: null,
+        error: action.payload.error,
+      };
+
+    case 'NEW_USER_SUCCESS':
+      return {
+        fetching: false,
+        user: action.payload.user,
+        error: null,
+      };
+
+    default:
+      return state;
+  }
+};
+```
+
+#### Create our saga
+
+Create a new `ducks/auth/sagas.js` file and add the next code:
+
+```javascript
+import { takeLatest, put, call } from 'redux-saga/effects';
+import * as actions from './actions';
+import firebase from '../../services/firebase';
+
+function* newUser(action) {
+  const { username, email, password } = action.payload;
+
+  yield put(actions.newUserStart());
+
+  try {
+    const auth = firebase.auth();
+    const userCredential = yield call([auth, auth.createUserWithEmailAndPassword], email, password);
+    if (userCredential) {
+      const { user } = userCredential;
+      yield call([user, user.updateProfile], { displayName: username });
+
+      yield put(actions.newUserSuccess(user));
+    }
+  } catch (error) {
+    yield put(actions.newUserFailure(error));
+  }
+}
+
+export default function* () {
+  yield takeLatest('NEW_USER_REQUEST', newUser);
+}
+```
+
+We are exporting a function (really a generator) that catch every `NEW_USER_REQUEST` action and delegates to the `newUser` function (another generator).
+
+On its way the `newUser` function trigger the `NEW_USER_START` action, tries to create the user and triggers `NEW_USER_SUCCESS` or `NEW_USER_FAILURE` depending on the result.
+
+The last one step is to add our saga to the `rootSaga`, so that `redux-saga` knows about it. Go to `./rootSaga.js` file and update like this:
+
+```javascript
+import { all } from 'redux-saga/effects';
+import authSagas from './ducks/auth/sagas';
+
+export default function* rootSaga() {
+  yield all([
+    authSagas(),
+  ]);
+}
+```
+
+### Update the SignupForm to trigger the `NEW_USER_REQUEST` action
+
+Finally, update the `containers/SignupForm.js` file to trigger the action that will activate our saga and create the user:
+
+```javascript
+...
+import { newUserRequest } from '../ducks/auth/actions';
+...
+
+class SignupForm extends PureComponent {
+  ...
+  handleCreateUser = async (username, email, password) => {
+    const { newUserAction } = this.props;
+    newUserAction({ username, email, password });
+  }
+  ...
+}
+
+...
+
+const mapDispatchToProps = dispatch => ({
+  newUserAction: user => dispatch(newUserRequest(user)),
+});
+
+...
+```
