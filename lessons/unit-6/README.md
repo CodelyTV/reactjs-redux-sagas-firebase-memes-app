@@ -241,3 +241,53 @@ const mapDispatchToProps = dispatch => ({
 
 ...
 ```
+
+### Start using the app state in other component
+
+Now that we store the logged user information in the redux store, that is, in our application state, we can start using those information in other components that requires it. As example we are going to modify `Home` component in the `src/App.js` file to show the current user logged name.
+
+Modify the next lines:
+
+```javascript
+const Home = () => (
+  <FullScreenWrapper>
+    This is the Home ! But you can go to <Link to={urls.SIGNUP}>signup section</Link> or navigate to an invalid place <Link to="/not-exists">invalid place</Link>
+  </FullScreenWrapper>
+);
+``` 
+
+to the next:
+
+> Take into account it is only as a sample. It is not a *good* idea to use one file to store two different presentational comoponents and a conteiner one:
+
+```javascript
+const HomeComponent = (props) => {
+  const { user } = props;
+
+  return (
+    <FullScreenWrapper>
+      <div>
+        You are logged as: {user ? user.displayName : 'NOT LOGGED'}
+        <br />
+        This is the Home ! But you can go to <Link to={urls.SIGNUP}>signup section</Link> or navigate to an invalid place <Link to="/not-exists">invalid place</Link>
+      </div>
+    </FullScreenWrapper>
+  );
+};
+
+HomeComponent.defaultProps = {
+  user: null,
+};
+
+HomeComponent.propTypes = {
+  user: PropTypes.object,
+};
+
+const mapStateToProps = state => ({
+  user: state.auth.user,
+});
+
+const Home = connect(mapStateToProps)(HomeComponent);
+```
+
+In summary, we are creating a container for the `Home` which recevives the `state.auth.user` property.

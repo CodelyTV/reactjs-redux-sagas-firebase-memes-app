@@ -1,4 +1,6 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import styled from 'styled-components';
 import {
   BrowserRouter, Switch, Route, Link,
@@ -16,11 +18,33 @@ const FullScreenWrapper = styled.div`
   background-color: ${props => props.backgroundColor || '#FFFFFF'}
 `;
 
-const Home = () => (
-  <FullScreenWrapper>
-    This is the Home ! But you can go to <Link to={urls.SIGNUP}>signup section</Link> or navigate to an invalid place <Link to="/not-exists">invalid place</Link>
-  </FullScreenWrapper>
-);
+const HomeComponent = (props) => {
+  const { user } = props;
+
+  return (
+    <FullScreenWrapper>
+      <div>
+        You are logged as: {user ? user.displayName : 'NOT LOGGED'}
+        <br />
+        This is the Home ! But you can go to <Link to={urls.SIGNUP}>signup section</Link> or navigate to an invalid place <Link to="/not-exists">invalid place</Link>
+      </div>
+    </FullScreenWrapper>
+  );
+};
+
+HomeComponent.defaultProps = {
+  user: null,
+};
+
+HomeComponent.propTypes = {
+  user: PropTypes.object,
+};
+
+const mapStateToProps = state => ({
+  user: state.auth.user,
+});
+
+const Home = connect(mapStateToProps)(HomeComponent);
 
 const App = () => (
   <BrowserRouter>
