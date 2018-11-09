@@ -5,6 +5,7 @@ import { Redirect } from 'react-router-dom';
 import SignupFormRender from '../components/SignupForm';
 import urls from '../urls';
 import { newUserRequest } from '../ducks/auth/actions';
+import { userSelector, fetchingSelector, errorSelector } from '../ducks/auth/selectors';
 
 class SignupForm extends PureComponent {
   static defaultProps = {
@@ -44,9 +45,9 @@ class SignupForm extends PureComponent {
 }
 
 const mapStateToProps = state => ({
-  user: state.auth.user,
-  fetching: state.auth.fetching,
-  error: state.auth.error,
+  user: userSelector(state),
+  fetching: fetchingSelector(state),
+  error: errorSelector(state),
 });
 
 const mapDispatchToProps = dispatch => ({

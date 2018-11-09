@@ -7,6 +7,7 @@ import {
 } from 'react-router-dom';
 import SignupForm from './containers/SignupForm';
 import NotFound from './components/NotFound';
+import { userSelector } from './ducks/auth/selectors';
 import urls from './urls';
 
 import './globalStyles';
@@ -41,7 +42,7 @@ HomeComponent.propTypes = {
 };
 
 const mapStateToProps = state => ({
-  user: state.auth.user,
+  user: userSelector(state),
 });
 
 const Home = connect(mapStateToProps)(HomeComponent);

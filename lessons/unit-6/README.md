@@ -290,4 +290,65 @@ const mapStateToProps = state => ({
 const Home = connect(mapStateToProps)(HomeComponent);
 ```
 
-In summary, we are creating a container for the `Home` which recevives the `state.auth.user` property.
+In summary, we are creating a container for the `Home` which receives the `state.auth.user` property.
+
+### Introduce selectors
+
+Right now we are accessing the `state.auth.user` property in two different parts of our code: in the `SignupForm` and in the `Home` containers. That means we need to remember the path to the `user` within the store each time we need to use it.
+
+Selectors are also great for memoize derived data. Suppose one of your store properties is an array of objects with a price attribute. Imagine you want to compute the sum of all prices to be shown in some components. Selectors allow us to compute that sum and memoize it so next time you access the selector values are not recomputed again.
+
+Start installing the [reselect](https://github.com/reduxjs/reselect) dependency: `$ yarn add reselect`.
+
+Next, create a `ducks/auth/selectors.hs` file which will contain the selectors used to get the `auth` properties like `user`, `isFetching` or `error`:
+
+```javascript
+import { createSelector } from 'reselect';
+
+const authSelector = state => state.auth;
+
+export const userSelector = createSelector(
+  authSelector,
+  auth => auth.user,
+);
+
+export const fetchingSelector = createSelector(
+  authSelector,
+  auth => auth.fetching,
+);
+
+export const errorSelector = createSelector(
+  authSelector,
+  auth => auth.error,
+);
+```
+
+The `createSelector` function requires two arguments:
+
+- an input selector. A function that will receive the `state` and must return the desired property.
+- a result function. A function that returns a value from the previous given the property.
+
+Now lets update `src/App.js` and `src/container/SignupForm` to use the selector instead retrieving state properties directly:
+
+```javascript
+// src/App.js
+...
+import { userSelector } from './ducks/auth/selectors';
+...
+const mapStateToProps = state => ({
+  user: userSelector(state),
+});
+...
+```
+
+```javascript
+...
+import { userSelector, fetchingSelector, errorSelector } from '../ducks/auth/selectors';
+...
+const mapStateToProps = state => ({
+  user: userSelector(state),
+  fetching: fetchingSelector(state),
+  error: errorSelector(state),
+});
+...
+```
