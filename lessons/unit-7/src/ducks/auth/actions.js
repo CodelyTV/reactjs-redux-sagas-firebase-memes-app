@@ -26,3 +26,36 @@ export const createUserFailed = error => ({
     error,
   },
 });
+
+/**
+ * Login user actions
+ */
+export const loginUserRequest = ({ email, password }) => ({
+  type: types.LOGIN_USER_REQUEST,
+  payload: {
+    email,
+    password,
+  },
+});
+export const loginUserStart = () => ({
+  type: types.LOGIN_USER_START,
+});
+export const loginUserSuccess = user => ({
+  type: types.LOGIN_USER_SUCCESS,
+  payload: {
+    user,
+  },
+});
+export const loginUserFailed = error => ({
+  type: types.LOGIN_USER_FAILED,
+  payload: {
+    error,
+  },
+});
+
+/**
+ * Logiut user action
+ */
+export const logoutUser = () => ({
+  type: types.LOGOUT_USER,
+});

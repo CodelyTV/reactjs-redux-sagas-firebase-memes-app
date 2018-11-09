@@ -16,8 +16,25 @@ function* createUser(action) {
   }
 }
 
+function* loginUser(action) {
+  yield put(actions.loginUserStart());
+
+  try {
+    const user = yield call(AuthService.loginUser, action.payload);
+    yield put(actions.loginUserSuccess(user));
+  } catch (error) {
+    yield put(actions.loginUserFailed(error));
+  }
+}
+
+function* logoutUser() {
+  yield call(AuthService.logoutUser);
+}
+
 export default function* () {
   yield all([
     yield takeLatest(types.CREATE_USER_REQUEST, createUser),
+    yield takeLatest(types.LOGIN_USER_REQUEST, loginUser),
+    yield takeLatest(types.LOGOUT_USER, logoutUser),
   ]);
 }
