@@ -138,3 +138,94 @@ class App extends Component {
   }
 }
 ```
+
+### Adding the login form
+
+Lets update the `containers/App.js` so that we show the `components/LoginForm.js` when the user is not logged in:
+
+```javascript
+    const { user } = this.props;
+    const { authChecked } = this.state;
+
+    // If auth is not checked yet the show start screen
+    if (!authChecked) {
+      return <Start />;
+    }
+
+    // If user is not logged in show the login form
+    if (!user) {
+      return (
+        <Router>
+          <Switch>
+            <Route exact path={urls.HOME} component={LoginForm} />
+            <Route path={urls.LOGIN} component={LoginForm} />
+            <Route path={urls.SIGNUP} component={SignupForm} />
+            <Route component={NotFound} />
+          </Switch>
+        </Router>
+      );
+    }
+
+    // If user is logged in setup the different routes
+    return (
+      <Router>
+        <Switch>
+          <Route exact path={urls.HOME} component={Home} />
+          <Route path={urls.LOGIN} component={LoginForm} />
+          <Route path={urls.SIGNUP} component={SignupForm} />
+          <Route component={NotFound} />
+        </Switch>
+      </Router>
+    );
+  }
+```
+
+Lets take a look to the `containers/LoginForm.js` code. The container gets the `state.auth` properties fro redux store and passes to the `components/LoginForm.js` to be rendered. When the form is submitted the `handleLoginUser` method is invoked which in fact simply triggers the `logginUser` actions.
+
+```javascript
+...
+import LoginFormRender from '../components/LoginForm';
+import { loginUserRequest } from '../ducks/auth/actions';
+import { userSelector, fetchingSelector, errorSelector } from '../ducks/auth/selectors';
+
+class LoginForm extends PureComponent {
+  ...
+
+  handleLoginUser = (email, password) => {
+    const { loginUserAction } = this.props;
+    loginUserAction({ email, password });
+  }
+
+  render() {
+    const { user, fetching, error } = this.props;
+    const errorMessage = error && error.message;
+
+    // If we are logged redirect to home
+    if (user) {
+      return <Redirect to={urls.HOME} />;
+    }
+
+    return (
+      <LoginFormRender
+        loading={fetching}
+        errorMessage={errorMessage}
+        onSubmit={this.handleLoginUser}
+      />
+    );
+  }
+}
+
+const mapStateToProps = state => ({
+  user: userSelector(state),
+  fetching: fetchingSelector(state),
+  error: errorSelector(state),
+});
+
+const mapDispatchToProps = dispatch => ({
+  loginUserAction: payload => dispatch(loginUserRequest(payload)),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(LoginForm);
+```
+
+As we sow previously, the `loginUser` action is catch by a saga, to run the login side effect. The saga triggers the corresponding start, success or failed events depending on the results and the reducer listens for the login events to update the store.

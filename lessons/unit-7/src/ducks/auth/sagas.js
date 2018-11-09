@@ -20,7 +20,8 @@ function* loginUser(action) {
   yield put(actions.loginUserStart());
 
   try {
-    const user = yield call(AuthService.loginUser, action.payload);
+    const { email, password } = action.payload;
+    const user = yield call(AuthService.loginUser, email, password);
     yield put(actions.loginUserSuccess(user));
   } catch (error) {
     yield put(actions.loginUserFailed(error));
