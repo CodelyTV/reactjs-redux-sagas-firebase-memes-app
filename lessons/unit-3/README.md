@@ -127,7 +127,7 @@ Finally, we are going to extract the code for the `NotFound` component to the `s
 
 > NOTE: We have created a `urls.js` with the name and url of the main sections of the app. This way we can use variables instead literal values in our code.
 
-[![basic navigation](../images/016.png)](../images/basic-navigation.mov)
+![basic navigation](../images/016.gif)
 
 ### Update stories
 
