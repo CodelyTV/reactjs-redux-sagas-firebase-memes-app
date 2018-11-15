@@ -22,7 +22,7 @@ class TimelineCard extends PureComponent {
     const { spark, style } = this.props;
 
     const userNameNick = `@${spark.userName}`;
-    const { gif_url: imageUrl, title } = spark.data;
+    const { url: imageUrl, title } = spark.data;
     const { timestamp, thumbsUp } = spark;
 
     return (

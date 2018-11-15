@@ -18,7 +18,7 @@ const search = async (query, offset) => {
 
   const filtered = data.map((item) => {
     preview = item.images.preview_gif;
-    if (preview.gif_url && preview.height && preview.width) {
+    if (preview.url && preview.height && preview.width) {
       return item;
     }
     return null;

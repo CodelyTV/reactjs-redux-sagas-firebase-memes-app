@@ -78,7 +78,7 @@ const search = async (query, offset) => {
 
   const filtered = data.map((item) => {
     preview = item.images.preview_gif;
-    if (preview.gif_url && preview.height && preview.width) {
+    if (preview.url && preview.height && preview.width) {
       return item;
     }
     return null;
@@ -96,6 +96,60 @@ export default {
 
 ### Query and show memes
 
-Lets update our `containers/Add.js` to use the giphy service to query and show memes to the user:
+Lets update our `containers/Add.js` to use the giphy service to query and show memes to the user.
+
+These are some points to take into account:
+
+- We want to query for memes each time the user changes the term to search. To avoid querying on each key press we use the `debounce` function from `lodash` project.
+- Given a term we can make many searches increasing the offset, i.e. when the user scrolls down. In this situation the search term is the same but we need to query for more memes.
+- We need to detect when there are no more items to avoid continue making requests to giphy.
+
+```javascript
+  queryForImages = debounce(
+    async (term = null) => {
+      const { data } = this.state;
+      const searchTerm = term || this.currentTerm;
+      const isNewTerm = searchTerm !== this.currentTerm;
+
+      if (isNewTerm) {
+        this.hasMoreData = true;
+      }
+
+      if (this.loading || !this.hasMoreData || !searchTerm) {
+        return;
+      }
+
+      this.loading = true;
+      const response = await giphy.search(term, this.offset);
+      const responseSize = response.data.length;
+
+      this.setState({
+        data: isNewTerm ? response.data : data.concat(response.data),
+      }, () => {
+        this.currentTerm = searchTerm;
+        this.hasMoreData = responseSize > 0;
+        this.offset = responseSize > 0 ? response.pagination.offset : 0;
+        this.loading = false;
+      });
+    },
+    250,
+  ).bind(this);
+```
+
+> Note how use `bind` the *debounced* function to have access to `this` context, that is, the class itself.
 
 ### Selecting a meme
+
+When an image is clicked the method `handleImageSelected` is invoked. At this point we have the index of the clicked image so it is easy for us to get the current selected.
+
+```javascript
+  handleImageSelected = (index) => {
+    const { data } = this.state;
+    const selectedImageData = data[index];
+
+    this.setState({
+      step: 'comment',
+      selectedImageData,
+    });
+  }
+```

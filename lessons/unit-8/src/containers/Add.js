@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import {
   Segment, Message, Modal, Icon,
 } from 'semantic-ui-react';
+import debounce from 'lodash/debounce';
 import Layout from './Layout';
 import AppBar from '../components/AppBar';
 import Search from '../components/Add/Search';
@@ -25,7 +26,7 @@ class Add extends PureComponent {
   }
 
   static propTypes = {
-
+    history: PropTypes.object.isRequired,
   }
 
   loading = false
@@ -42,24 +43,65 @@ class Add extends PureComponent {
     step: 'search',
   }
 
+  queryForImages = debounce(
+    async (term = null) => {
+      const { data } = this.state;
+      const searchTerm = term || this.currentTerm;
+      const isNewTerm = searchTerm !== this.currentTerm;
+
+      if (isNewTerm) {
+        this.hasMoreData = true;
+      }
+
+      if (this.loading || !this.hasMoreData || !searchTerm) {
+        return;
+      }
+
+      this.loading = true;
+      const response = await giphy.search(term, this.offset);
+      const responseSize = response.data.length;
+
+      this.setState({
+        data: isNewTerm ? response.data : data.concat(response.data),
+      }, () => {
+        this.currentTerm = searchTerm;
+        this.hasMoreData = responseSize > 0;
+        this.offset = responseSize > 0 ? response.pagination.offset : 0;
+        this.loading = false;
+      });
+    },
+    250,
+  ).bind(this);
+
   handleBackClicked = () => {
-    console.log('Add > handleBackClicked');
+    const { step } = this.state;
+    const { history } = this.props;
+
+    if (step === 'search') {
+      history.goBack();
+    } else {
+      this.setState({ step: 'search' });
+    }
   }
 
-  handleTermChanged = (term) => {
-    console.log('Add > handleTermChanged');
-  };
+  handleTermChanged = term => term && this.queryForImages(term);
 
-  handleOnScroll = () => {
-    console.log('Add > handleOnScroll');
-  };
+  handleOnScroll = () => this.queryForImages();
 
   handleImageSelected = (index) => {
-    console.log('Add > handleImageSelected');
+    const { data } = this.state;
+    const selectedImageData = data[index];
+
+    this.setState({
+      step: 'comment',
+      selectedImageData,
+    });
   }
 
   handleSubmit = (title) => {
-    console.log('Add > handleSubmit');
+    const { selectedImageData } = this.state;
+
+    // TODO - Trigger action to store data.
   }
 
   render() {

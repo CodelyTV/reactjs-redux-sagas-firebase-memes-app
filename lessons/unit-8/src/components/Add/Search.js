@@ -119,7 +119,7 @@ class Search extends Component {
       <Cell
         key={key}
         style={style}
-        src={preview.gif_url}
+        src={preview.url}
         data-index={index}
         onClick={this.handleImageClick}
       />

@@ -49,7 +49,7 @@ class Comment extends PureComponent {
     return (
       <div>
         <Container textAlign="center">
-          <Image src={selectedImageData.images.fixed_width.gif_url} style={{ display: 'inline', width: '100%' }} />
+          <Image src={selectedImageData.images.fixed_width.url} style={{ display: 'inline', width: '100%' }} />
         </Container>
 
         <h4>Comment:</h4>

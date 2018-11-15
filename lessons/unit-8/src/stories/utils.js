@@ -4,7 +4,7 @@ export const createCardData = () => ({
   userName: 'john',
   data: {
     gif_size: 252485,
-    gif_url: 'https://media3.giphy.com/media/l2Sqd3jnE4QEyOPM4/200w.gif',
+    url: 'https://media3.giphy.com/media/l2Sqd3jnE4QEyOPM4/200w.gif',
     height: 82,
     media_id: 'l2Sqd3jnE4QEyOPM4',
     mp4_size: 30334,
