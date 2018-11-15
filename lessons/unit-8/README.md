@@ -48,3 +48,54 @@ import Add from './Add';
 ```
 
 Now we can start the *add* process by accessing the url `http://localhost:3000/add`.
+
+> Note, by the fact the `Add` container is added to the `Route` it will receive the properties: `match`, `location` and `history`.
+
+### Create a service to query giphy
+
+Lets create a service responsible to query memes on giphy API. Fortunately for us, giphy offers a JavaScript API :) Install the dependency with `$ yarn add giphy-js-sdk-core`.
+
+Now we are going to create a service that given a search term and an offset makes a search on giphy. Create the `src/services/giphy.js` file:
+
+```javascript
+const GphApiClient = require('giphy-js-sdk-core');
+
+const API_KEY = process.env.REACT_APP_GIPHY_API_KEY;
+
+const client = GphApiClient(API_KEY);
+
+const search = async (query, offset) => {
+  const response = await client.search('gifs', {
+    q: query,
+    offset,
+  });
+
+  const { data } = response;
+  let preview;
+
+  // Sometimes giphy returns images with null values so we use this method
+  // to remove invalid results.
+
+  const filtered = data.map((item) => {
+    preview = item.images.preview_gif;
+    if (preview.gif_url && preview.height && preview.width) {
+      return item;
+    }
+    return null;
+  }).filter(item => item);
+
+  response.data = filtered;
+
+  return response;
+};
+
+export default {
+  search,
+};
+```
+
+### Query and show memes
+
+Lets update our `containers/Add.js` to use the giphy service to query and show memes to the user:
+
+### Selecting a meme

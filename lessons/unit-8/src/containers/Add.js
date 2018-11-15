@@ -9,6 +9,7 @@ import AppBar from '../components/AppBar';
 import Search from '../components/Add/Search';
 import Comment from '../components/Add/Comment';
 
+import giphy from '../services/giphy';
 import urls from '../urls';
 
 const segmentStyle = {
