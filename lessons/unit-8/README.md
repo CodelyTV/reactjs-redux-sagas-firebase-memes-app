@@ -2,6 +2,26 @@
 
 In this unit we will create the section of the app responsible to add new memes and we will see how to query for memes to the [giphy](https://giphy.com/) service.
 
+## Giphy API
+
+You can find a description of the Giphy API for [search](https://developers.giphy.com/docs/#giphy-sdks) and [image](https://developers.giphy.com/docs/#images-object) response following the links.
+
+A call to giphy search api will return a response with `data`, `pagination` and `meta` properties:
+
+![response](../images/023.png)
+
+The `data` property contains the list of images that meets the search conditions. Each one contains the information described [here](https://developers.giphy.com/docs/#images-object):
+
+![image object](../images/024.png)
+
+The images object contains many image formats, but we will make use only for `preview_gif` and `fixed_width`. The `preview_gif` info we will used when searching for memes. The url contained in this object points to an optimized and reduced gif images, mainly designed for preview:
+
+![preview_gif](../images/025.png)
+
+We will use the `fixed_width` information to store it in Firebase. The image referenced within this object is what we will use for the app timeline:
+
+![fixed_width](../images/026.png)
+
 ## Steps
 
 ### Before to start
