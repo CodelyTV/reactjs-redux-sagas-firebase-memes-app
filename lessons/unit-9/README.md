@@ -9,7 +9,7 @@ Some points to take into account when working with Firebase RealTime Database:
 - It is a NoSQL database
 - Data is stores in JSON
 - Firebase synchronize content between database and clients in realtime through websockets.
-- You need to know how your clients will access your data and structure accordingly. This means
+- You need to know how your clients will access your data and structure accordingly.
 - You need to define security rules to define who can read/write within the properties tree.
 
 ### Working with RealTime Database
@@ -187,14 +187,30 @@ We can attach listeners to properties to be notified when values are added, remo
 >
 > ![collectionA example](../images/039.png)
 
-
 ### Structuring data
 
-Let thinks on our app:
+To design your database structure it is important to take into account next points:
 
-- When a user logs in, the home show a *global* timeline with memes from all users.
+- RealTime Database is a NoSQL database that, at the end, that means denormalized data works better.
+- How your clients will access your data and structure accordingly.
+- When you read a node in RealTime Database you are retrieving all the content of that node.
+
+Thinking in our app, we want:
+
+- When a user logs in, the home must show a *global* timeline with memes from all users.
 - When user goes to his/her profile, he/she must see his/her name and a timeline with his/her owm memes.
+- Each meme must show its creation date, author and number of thumbs up (likes) received by other users.
 
+With that requirements in mind our data structure proposal is as follows:
+
+- `users`: We will store the information related to each user within a `users` property using. The key for each user will be the `uid` returned by Firebase Authentication.
+  Each user entry will contain: the creation time, the user's display name and a `feed` property where we will store the `id` of each spark (the memes) published by the users.
+
+  ![user structure](../images/040.png)
+
+- `sparks`: This will contains the list of memes from all the users. In this case, the key for each spark is generated automatically by Firebase, which ensures it is ordered by the current time. Each meme will store: the creation time, the id to its `author`, a `data` property with some properties related to the giphy image (url, title, size, etc) and the number of likes receibed.
+
+  ![spark structure](../images/041.png)
 
 ## Steps
 
