@@ -9,7 +9,8 @@ import Layout from './Layout';
 import AppBar from '../components/AppBar';
 import Search from '../components/Add/Search';
 import Comment from '../components/Add/Comment';
-
+import { postSparkRequest } from '../ducks/data/actions';
+import { fetchingSelector, errorSelector } from '../ducks/data/selectors';
 import giphy from '../services/giphy';
 import urls from '../urls';
 
@@ -22,11 +23,15 @@ const segmentStyle = {
 
 class Add extends PureComponent {
   static defaultProps = {
-
+    fetching: false,
+    error: null,
   }
 
   static propTypes = {
     history: PropTypes.object.isRequired,
+    postSpark: PropTypes.func.isRequired,
+    fetching: PropTypes.bool,
+    error: PropTypes.object,
   }
 
   loading = false
@@ -73,6 +78,21 @@ class Add extends PureComponent {
     250,
   ).bind(this);
 
+  componentDidUpdate(prevProps, prevState) {
+    const { step } = prevState;
+    const { fetching, error, history } = this.props;
+
+    // If meme is posting successfully redirect to home
+    if (step === 'posting' && !error && !fetching) {
+      this.setState({ step: 'posted' }); // eslint-disable-line react/no-did-update-set-state
+
+      setTimeout(
+        () => history.push(urls.HOME),
+        1000,
+      );
+    }
+  }
+
   handleBackClicked = () => {
     const { step } = this.state;
     const { history } = this.props;
@@ -100,15 +120,20 @@ class Add extends PureComponent {
 
   handleSubmit = (title) => {
     const { selectedImageData } = this.state;
+    const { postSpark } = this.props;
+    const data = {
+      ...selectedImageData,
+      title,
+    };
+    postSpark(data);
 
-    // TODO - Trigger action to store data.
+    this.setState({ step: 'posting' });
   }
 
   render() {
     const { data, step, selectedImageData } = this.state;
-    const fetching = false;
-    const error = null;
-    const errorMessage = null;
+    const { fetching, error } = this.props;
+    const errorMessage = error && error.message;
 
     return (
       <Layout section={urls.ADD} navBar={false}>
@@ -153,11 +178,12 @@ class Add extends PureComponent {
 }
 
 const mapStateToProps = state => ({
-
+  fetching: fetchingSelector(state),
+  error: errorSelector(state),
 });
 
 const mapDispatchToProps = dispatch => ({
-
+  postSpark: data => dispatch(postSparkRequest(data)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Add);

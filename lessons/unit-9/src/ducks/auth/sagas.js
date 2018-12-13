@@ -2,6 +2,7 @@ import {
   all, takeLatest, put, call,
 } from 'redux-saga/effects';
 import AuthService from '../../services/AuthService';
+import DataService from '../../services/DataService';
 import * as actions from './actions';
 import * as types from './types';
 
@@ -10,6 +11,7 @@ function* createUser(action) {
 
   try {
     const user = yield call(AuthService.createUser, action.payload);
+    yield call(DataService.addUser, user);
     yield put(actions.createUserSuccess(user));
   } catch (error) {
     yield put(actions.createUserFailed(error));

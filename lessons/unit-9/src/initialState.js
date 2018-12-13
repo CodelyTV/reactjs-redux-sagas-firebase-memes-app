@@ -5,4 +5,11 @@ export default {
     error: null,
     user: null,
   },
+
+  // Content
+  sparks: {
+    fetching: false,
+    error: null,
+    data: [],
+  },
 };
