@@ -10,6 +10,7 @@ import urls from '../urls';
 import AuthService from '../services/AuthService';
 import Start from '../components/Start';
 import Add from './Add';
+import Profile from './Profile';
 import { loginUserSuccess, logoutUser } from '../ducks/auth/actions';
 import { userSelector } from '../ducks/auth/selectors';
 
@@ -72,6 +73,7 @@ class App extends Component {
         <Switch>
           <Route exact path={urls.HOME} component={Home} />
           <Route exact path={urls.ADD} component={Add} />
+          <Route exact path={urls.PROFILE} component={Profile} />
           <Route path={urls.LOGIN} component={LoginForm} />
           <Route path={urls.SIGNUP} component={SignupForm} />
           <Route component={NotFound} />

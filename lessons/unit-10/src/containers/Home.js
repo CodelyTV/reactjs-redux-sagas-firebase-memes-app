@@ -1,44 +1,80 @@
-import React from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import debounce from 'lodash/debounce';
+import Layout from './Layout';
+import AppBar from '../components/AppBar';
+import Timeline from '../components/Timeline';
 import urls from '../urls';
-import { userSelector } from '../ducks/auth/selectors';
 
-const FullScreenWrapper = styled.div`
-  display: fixed;
-  width: 100%;
-  height: 100%;
-  background-color: ${props => props.backgroundColor || '#FFFFFF'}
-`;
+// import { loadSparksRequest, thumbsUpRequest } from '../ducks/data/actions';
+import { dataSelector, fetchingSelector, errorSelector } from '../ducks/data/selectors';
 
-const HomeComponent = (props) => {
-  const { user } = props;
+class Home extends PureComponent {
+  static defaultProps = {
+    data: [],
+    error: null,
+  }
 
-  return (
-    <FullScreenWrapper>
-      <div>
-        You are logged as: {user ? user.displayName : 'NOT LOGGED'}
-        <br />
-        This is the Home ! But you can go to <Link to={urls.SIGNUP}>signup section</Link> or navigate to an invalid place <Link to="/not-exists">invalid place</Link>
-      </div>
-    </FullScreenWrapper>
-  );
-};
+  static propTypes = {
+    data: PropTypes.array,
+    fetching: PropTypes.bool.isRequired,
+    error: PropTypes.object,
+    loadSparks: PropTypes.func.isRequired,
+  }
 
-HomeComponent.defaultProps = {
-  user: null,
-};
+  loading = false
 
-HomeComponent.propTypes = {
-  user: PropTypes.object,
-};
+  hasMoreData = true
+
+  offset = 0
+
+  // Debounce the action to load memes to avoid triggering tons of requests
+  requestSparks = debounce(
+    () => {}, // This is the function that will load the memes
+    250,
+  ).bind(this);
+
+  componentDidMount() {
+    // Load memes when the component is mounted
+    this.requestSparks();
+  }
+
+  handleScroll = () => {
+    const { data } = this.props;
+    const size = data.length;
+    const lastKey = size && data[size - 1].key;
+
+    // Load memes when we reach the bottom of the timeline
+    this.requestSparks(lastKey);
+  }
+
+  render() {
+    const { data, fetching, error } = this.props;
+
+    return (
+      <Layout section={urls.HOME}>
+        <AppBar />
+
+        <Timeline
+          data={data}
+          loading={fetching}
+          error={error && error.message}
+          onScroll={this.handleScroll}
+        />
+      </Layout>
+    );
+  }
+}
 
 const mapStateToProps = state => ({
-  user: userSelector(state),
+  data: dataSelector(state),
+  fetching: fetchingSelector(state),
+  error: errorSelector(state),
 });
 
-const Home = connect(mapStateToProps)(HomeComponent);
+const mapDispatchToProps = dispatch => ({
+  // loadSparks: lastKey => dispatch(loadSparksRequest(lastKey)),
+});
 
-export default Home;
+export default connect(mapStateToProps, mapDispatchToProps)(Home);
