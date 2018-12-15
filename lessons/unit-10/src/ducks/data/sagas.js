@@ -25,8 +25,22 @@ function* postSpark(action) {
   }
 }
 
+function* loadSparks(action) {
+  const { uid, lastKey } = action.payload;
+
+  yield put(actions.loadSparksStart(!lastKey));
+
+  try {
+    const sparks = yield call(DataService.loadSparks, { uid, lastKey });
+    yield put(actions.loadSparksSuccess(sparks));
+  } catch (error) {
+    yield put(actions.loadSparksFailed(error));
+  }
+}
+
 export default function* () {
   yield all([
     yield takeLatest(types.POST_SPARK_REQUEST, postSpark),
+    yield takeLatest(types.LOAD_SPARKS_REQUEST, loadSparks),
   ]);
 }

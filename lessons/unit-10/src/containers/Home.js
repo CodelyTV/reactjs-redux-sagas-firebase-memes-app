@@ -7,7 +7,7 @@ import AppBar from '../components/AppBar';
 import Timeline from '../components/Timeline';
 import urls from '../urls';
 
-// import { loadSparksRequest, thumbsUpRequest } from '../ducks/data/actions';
+import { loadSparksRequest } from '../ducks/data/actions';
 import { dataSelector, fetchingSelector, errorSelector } from '../ducks/data/selectors';
 
 class Home extends PureComponent {
@@ -31,7 +31,13 @@ class Home extends PureComponent {
 
   // Debounce the action to load memes to avoid triggering tons of requests
   requestSparks = debounce(
-    () => {}, // This is the function that will load the memes
+    async (lastKey = null) => {
+      const { loadSparks, fetching } = this.props;
+      if (fetching) {
+        return;
+      }
+      loadSparks({ lastKey });
+    },
     250,
   ).bind(this);
 
@@ -74,7 +80,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  // loadSparks: lastKey => dispatch(loadSparksRequest(lastKey)),
+  loadSparks: lastKey => dispatch(loadSparksRequest(lastKey)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);

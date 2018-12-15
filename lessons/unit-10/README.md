@@ -133,3 +133,186 @@ For the logout we invoke the `logout` action (that will make a signout of the us
 > NOTE: The `Profile` component receives the `history` property because it is a child of the `Route` component used in the `App.js`. In any other case, if you desire to access the history or react-router info in a component you need to wrap it with the HOC `withRouter`
 
 ### Create actions, sagas and reducers to load memes
+
+Add the next constants to the  `ducks/data/types.js`:
+
+```javascript
+export const LOAD_SPARKS_REQUEST = 'sparks/load/request';
+export const LOAD_SPARKS_START = 'sparks/load/start';
+export const LOAD_SPARKS_SUCCESS = 'sparks/load/success';
+export const LOAD_SPARKS_FAILED = 'sparks/load/failed';
+```
+
+Add the actions needed for the *load sparks* action. Note the `loadSparksRequest` action pass two parameters: a user `uid`, to indicate we want to load memes from a given user instead everybody, and the `lastKey` of the last meme loaded so we can continue loading another chunk of memes from there.
+
+```javascript
+export const loadSparksRequest = ({ uid, lastKey }) => ({
+  type: types.LOAD_SPARKS_REQUEST,
+  payload: {
+    uid,
+    lastKey,
+  },
+});
+export const loadSparksStart = clear => ({
+  type: types.LOAD_SPARKS_START,
+  payload: {
+    clear,
+  },
+});
+export const loadSparksSuccess = sparks => ({
+  type: types.LOAD_SPARKS_SUCCESS,
+  payload: {
+    sparks,
+  },
+});
+export const loadSparksFailed = error => ({
+  type: types.LOAD_SPARKS_FAILED,
+  payload: {
+    error,
+  },
+});
+```
+
+Update the `ducks/data/sagas.js` file yo listen for the *request* action. As you can see the `loadSparks` sagas simply triggers the appropriate actions and all the logic to access data is in the `DataService.loadSparks` method.
+
+> We will see the implementation of `DataService.loadSparks` in the next section.
+
+```javascript
+...
+
+function* loadSparks(action) {
+  const { uid, lastKey } = action.payload;
+
+  yield put(actions.loadSparksStart(!lastKey));
+
+  try {
+    const sparks = yield call(DataService.loadSparks, { uid, lastKey });
+    yield put(actions.loadSparksSuccess(sparks));
+  } catch (error) {
+    yield put(actions.loadSparksFailed(error));
+  }
+}
+
+export default function* () {
+  yield all([
+    yield takeLatest(types.POST_SPARK_REQUEST, postSpark),
+    yield takeLatest(types.LOAD_SPARKS_REQUEST, loadSparks),
+  ]);
+}
+```
+
+Finally, we need to update our `ducks/data/reducer.js` to manage the load start, success and failure actions. The main part is the `success` action where we need to concatenate the current loaded memes with the new ones loaded by the action:
+
+```javascript
+export default function (state = defaultState, action) {
+  switch (action.type) {
+    ...
+    case types.LOAD_SPARKS_START: {
+      return {
+        ...state,
+        fetching: true,
+        error: null,
+        data: action.payload.clear ? [] : [...state.data],
+      };
+    }
+
+    case types.LOAD_SPARKS_SUCCESS: {
+      return {
+        ...state,
+        data: [...state.data].concat(action.payload.sparks),
+        fetching: false,
+        error: null,
+      };
+    }
+
+    case types.POST_SPARK_FAILED:
+    case types.LOAD_SPARKS_FAILED: {
+      return {
+        ...state,
+        fetching: false,
+        error: action.payload.error,
+      };
+    }
+
+    default:
+      return state;
+  }
+}
+```
+
+### Querying memes in Firebase RealTime Database
+
+The code needed to retrive memes from Friebase is located under `DataService.loadSparks`. As we said it recevies two parameters:
+
+- `uid`, if provided it means we only need to retrive memes posted by this user, that is, we are retrieving the memes from the user timeline. Otherwise we will query all the memes no matter the user posted them.
+- `lastKey`, if provided is the key of the last meme read and that means we need to continue reading from there.
+
+```javascript
+  /**
+   * Load sparks. If user is provided it loads the user's feed sparks.
+   */
+  loadSparks = async ({ uid = null, lastKey = null } = {}) => {
+    let sparks;
+
+    if (!uid) {
+      sparks = await loadSparksFromAllUsers(lastKey);
+    } else {
+      sparks = await loadSparksFromUserFeed(uid, lastKey);
+    }
+
+    // Update each spark with author display name
+    const updatedSparks = await Promise.all(sparks.map(async (sparkData) => {
+      const userName = await getUserDisplayName(sparkData.author);
+      return {
+        ...sparkData,
+        userName,
+      };
+    }));
+
+    return updatedSparks;
+  };
+```
+
+As you can see, first we get the *memes* or the *sparks* and for each of them we get the data from its author attaching to the final data under the `userName` property.
+
+If we were working with HTTP connections you could just screaming `OMG ! For each meme one extra request to get the user's name !`, but that's not the case when working with Firebase. Firebase uses websockets, that means we have an open connection through which we can make tons of requests without suffering performance issues. 
+
+In the code, instead query for each meme author sequentially we are creating an array of promises (each one responsible to query for the author of a meme) and *running all the promises at the time* (note the emphasis in the sentence 😅). 
+
+----
+
+The way to query for memes is implemented in the functions `loadSparksFromAllUsers` and `loadSparksFromUserFeed` and depends on:
+
+- To read memes from all the users:
+  1. we need to query at `/sparks` property of the database and then
+  2. for each meme, query to get their author name.
+- To retrieve the memes of a given user:
+  1. we need to first read his/her feed at `/users/{uid}/feed` to get an array or meme ids.
+  2. for each id get the meme itseflf
+  3. for each meme, query to get their author name.
+
+To load a chunk of memes from a given position Firebase RealTime Database has some nice methods `endAt` and `limitToLast`:
+
+![endAt_limit](../images/044.png)
+
+```javascript
+  let query;
+  if (!lastKey) {
+    query = database.ref('sparks/')
+      .orderByKey()
+      .limitToLast(LIMIT);
+  } else {
+    query = database.ref('sparks/')
+      .orderByKey()
+      .endAt(lastKey)
+      .limitToLast(LIMIT);
+  }
+```
+
+> Note, there exists also the counterpart functions `startAt` and `limitToFirst`.
+
+Because we want to query the memes only once we run the query with `query.once('value')`:
+
+```javascript
+const snapshot = await query.once('value');
+```

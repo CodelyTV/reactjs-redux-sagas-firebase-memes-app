@@ -18,3 +18,29 @@ export const postSparkFailed = error => ({
     error,
   },
 });
+
+export const loadSparksRequest = ({ uid, lastKey }) => ({
+  type: types.LOAD_SPARKS_REQUEST,
+  payload: {
+    uid,
+    lastKey,
+  },
+});
+export const loadSparksStart = clear => ({
+  type: types.LOAD_SPARKS_START,
+  payload: {
+    clear,
+  },
+});
+export const loadSparksSuccess = sparks => ({
+  type: types.LOAD_SPARKS_SUCCESS,
+  payload: {
+    sparks,
+  },
+});
+export const loadSparksFailed = error => ({
+  type: types.LOAD_SPARKS_FAILED,
+  payload: {
+    error,
+  },
+});

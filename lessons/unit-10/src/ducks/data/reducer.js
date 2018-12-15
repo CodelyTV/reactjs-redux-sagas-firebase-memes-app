@@ -12,6 +12,15 @@ export default function (state = defaultState, action) {
         error: null,
       };
 
+    case types.LOAD_SPARKS_START: {
+      return {
+        ...state,
+        fetching: true,
+        error: null,
+        data: action.payload.clear ? [] : [...state.data],
+      };
+    }
+
     case types.POST_SPARK_SUCCESS: {
       return {
         ...state,
@@ -20,7 +29,17 @@ export default function (state = defaultState, action) {
       };
     }
 
+    case types.LOAD_SPARKS_SUCCESS: {
+      return {
+        ...state,
+        data: [...state.data].concat(action.payload.sparks),
+        fetching: false,
+        error: null,
+      };
+    }
+
     case types.POST_SPARK_FAILED:
+    case types.LOAD_SPARKS_FAILED:
       return {
         ...state,
         fetching: false,

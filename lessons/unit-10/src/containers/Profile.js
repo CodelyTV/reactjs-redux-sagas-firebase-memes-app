@@ -10,7 +10,7 @@ import Timeline from '../components/Timeline';
 import urls from '../urls';
 
 import { logoutUser } from '../ducks/auth/actions';
-// import { loadSparksRequest } from '../ducks/data/actions';
+import { loadSparksRequest } from '../ducks/data/actions';
 
 import { userSelector } from '../ducks/auth/selectors';
 import { dataSelector, fetchingSelector, errorSelector } from '../ducks/data/selectors';
@@ -46,7 +46,14 @@ class Profile extends PureComponent {
   offset = 0
 
   requestSparks = debounce(
-    () => {},
+    async (lastKey = null) => {
+      const { user, loadSparks, fetching } = this.props;
+      if (fetching) {
+        return;
+      }
+
+      loadSparks({ uid: user.uid, lastKey });
+    },
     250,
   ).bind(this);
 
@@ -103,7 +110,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  // loadSparks: ({ uid, lastKey }) => dispatch(loadSparksRequest({ uid, lastKey })),
+  loadSparks: ({ uid, lastKey }) => dispatch(loadSparksRequest({ uid, lastKey })),
   logout: () => dispatch(logoutUser()),
 });
 
