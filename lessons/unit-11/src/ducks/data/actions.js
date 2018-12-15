@@ -44,3 +44,26 @@ export const loadSparksFailed = error => ({
     error,
   },
 });
+
+
+export const thumbsUpRequest = key => ({
+  type: types.THUMBS_UP_REQUEST,
+  payload: {
+    key,
+  },
+});
+export const thumbsUpStart = () => ({
+  type: types.THUMBS_UP_START,
+});
+export const thumbsUpSuccess = spark => ({
+  type: types.THUMBS_UP_SUCCESS,
+  payload: {
+    spark,
+  },
+});
+export const thumbsUpFailed = error => ({
+  type: types.THUMBS_UP_FAILED,
+  payload: {
+    error,
+  },
+});

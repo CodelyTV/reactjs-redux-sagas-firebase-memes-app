@@ -2,7 +2,9 @@ import firebase from './firebase';
 
 const database = firebase.database();
 
-const LIMIT = 10;
+window.database = database;
+
+const LIMIT = 3;
 
 const getUserDisplayName = async (uid) => {
   let displayName = null;
@@ -142,6 +144,30 @@ class Service {
 
     return updatedSparks;
   };
+
+  /**
+   * Increase a spark's thumbs up value
+   */
+  thumbsUp = async (key) => {
+    const result = await database.ref(`sparks/${key}`)
+      // We update the spark in a transaction operation to avoid concurrency problems.
+      // The way to do is "querying" for the spark and updating its properties.
+      .transaction((spark) => {
+        if (spark) {
+          return {
+            ...spark,
+            key,
+            thumbsUp: spark.thumbsUp ? spark.thumbsUp + 1 : 1,
+          };
+        }
+        return spark;
+      });
+
+    if (result.committed && result.snapshot.exists()) {
+      return result.snapshot.val();
+    }
+    return null;
+  }
 }
 
 export default new Service();

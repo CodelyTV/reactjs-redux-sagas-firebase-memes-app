@@ -7,7 +7,7 @@ import AppBar from '../components/AppBar';
 import Timeline from '../components/Timeline';
 import urls from '../urls';
 
-import { loadSparksRequest } from '../ducks/data/actions';
+import { loadSparksRequest, thumbsUpRequest } from '../ducks/data/actions';
 import { dataSelector, fetchingSelector, errorSelector } from '../ducks/data/selectors';
 
 class Home extends PureComponent {
@@ -21,6 +21,7 @@ class Home extends PureComponent {
     fetching: PropTypes.bool.isRequired,
     error: PropTypes.object,
     loadSparks: PropTypes.func.isRequired,
+    thumbsUp: PropTypes.func.isRequired,
   }
 
   loading = false
@@ -29,7 +30,6 @@ class Home extends PureComponent {
 
   offset = 0
 
-  // Debounce the action to load memes to avoid triggering tons of requests
   requestSparks = debounce(
     async (lastKey = null) => {
       const { loadSparks, fetching } = this.props;
@@ -42,7 +42,6 @@ class Home extends PureComponent {
   ).bind(this);
 
   componentDidMount() {
-    // Load memes when the component is mounted
     this.requestSparks();
   }
 
@@ -51,8 +50,12 @@ class Home extends PureComponent {
     const size = data.length;
     const lastKey = size && data[size - 1].key;
 
-    // Load memes when we reach the bottom of the timeline
     this.requestSparks(lastKey);
+  }
+
+  handleOnThumb = (spark) => {
+    const { thumbsUp } = this.props;
+    thumbsUp(spark.key);
   }
 
   render() {
@@ -67,6 +70,7 @@ class Home extends PureComponent {
           loading={fetching}
           error={error && error.message}
           onScroll={this.handleScroll}
+          onThumbClick={this.handleOnThumb}
         />
       </Layout>
     );
@@ -81,6 +85,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   loadSparks: lastKey => dispatch(loadSparksRequest(lastKey)),
+  thumbsUp: key => dispatch(thumbsUpRequest(key)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);

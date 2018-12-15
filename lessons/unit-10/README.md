@@ -93,7 +93,7 @@ Lets create a `containers/Profile.js` file. The code will be very similar to the
   }
 ```
 
-![profile](../images/042.png)
+![profile](../images/043.png)
 
 Update the `containers/App.js` file to import the `Profile` component and add it to the known routes:
 

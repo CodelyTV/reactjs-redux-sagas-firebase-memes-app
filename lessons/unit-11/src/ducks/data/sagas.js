@@ -38,9 +38,22 @@ function* loadSparks(action) {
   }
 }
 
+function* thumbsUpSpark(action) {
+  const { key } = action.payload;
+  yield put(actions.thumbsUpStart(key));
+
+  try {
+    const spark = yield call(DataService.thumbsUp, key);
+    yield put(actions.thumbsUpSuccess(spark));
+  } catch (error) {
+    yield put(actions.thumbsUpFailed(error));
+  }
+}
+
 export default function* () {
   yield all([
     yield takeLatest(types.POST_SPARK_REQUEST, postSpark),
     yield takeLatest(types.LOAD_SPARKS_REQUEST, loadSparks),
+    yield takeLatest(types.THUMBS_UP_REQUEST, thumbsUpSpark),
   ]);
 }

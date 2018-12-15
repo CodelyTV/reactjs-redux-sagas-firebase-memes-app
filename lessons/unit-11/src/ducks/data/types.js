@@ -7,3 +7,8 @@ export const LOAD_SPARKS_REQUEST = 'sparks/load/request';
 export const LOAD_SPARKS_START = 'sparks/load/start';
 export const LOAD_SPARKS_SUCCESS = 'sparks/load/success';
 export const LOAD_SPARKS_FAILED = 'sparks/load/failed';
+
+export const THUMBS_UP_REQUEST = 'sparks/thumbsup/request';
+export const THUMBS_UP_START = 'sparks/thumbsup/start';
+export const THUMBS_UP_SUCCESS = 'sparks/thumbsup/success';
+export const THUMBS_UP_FAILED = 'sparks/thumbsup/failed';
