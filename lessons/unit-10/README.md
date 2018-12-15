@@ -288,7 +288,7 @@ The way to query for memes is implemented in the functions `loadSparksFromAllUse
   2. for each meme, query to get their author name.
 - To retrieve the memes of a given user:
   1. we need to first read his/her feed at `/users/{uid}/feed` to get an array or meme ids.
-  2. for each id get the meme itseflf
+  2. for each id get the meme itself
   3. for each meme, query to get their author name.
 
 To load a chunk of memes from a given position Firebase RealTime Database has some nice methods `endAt` and `limitToLast`:
